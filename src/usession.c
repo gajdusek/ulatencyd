@@ -758,7 +758,7 @@ u_session_active_changed (USession *sess,
               sess->name, sess->id, sess->uid);
       // iteration must be run before xwatch poll to avoid freezes on my system,
       // FIXME: better to sotp xwatch from polling other servers
-      iteration_request_full(G_PRIORITY_HIGH, 0, TRUE);
+      iteration_request_full (G_PRIORITY_HIGH, 0);
     }
   else
     {

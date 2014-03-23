@@ -2437,51 +2437,104 @@ static void update_caches() {
 
 // iteration requests
 
-static guint iteration_request_id = 0;
-static gboolean iteration_request_forced = FALSE;
+// information about a scheduled request for iteration
+static guint    iter_req_id = 0;            // id of request g_source
+static gboolean iter_req_uses_secs = FALSE; // if added by g_timeout_*_seconds()
+static guint    iter_req_delay = G_MAXUINT; // g_source interval (ms)
+static gint64   iter_req_start = 0;         // time when g_source was added (us)
+
+// TODO update to use glib 2.36 g_source_{get,set}_ready_time()
 
 /**
  * Request iteration.
  *
  * @param priority      the priority of the timeout source. Typically this will
- *                      be `G_PRIORITY_DEFAULT`.
+ *                      be `G_PRIORITY_DEFAULT` + 1.
  * @param milliseconds  delay before `iterate()`
- * @param force         If TRUE, further requests will be ignored
  *
  * Use this to request new iteration rather than calling `g_timoute_add_*()`
- * directly. Each request will replace the previous one, unless the previous one
- * was 'forced'.
- *
- * If you do 'forced' request, further requests will be dropped until
- * the forced one is dispatched.
- *
- * @return FALSE if the request was ignored because a pending forced request,
- * otherwise TRUE.
+ * directly. Subsequent requests will be merged.
  */
-gboolean iteration_request_full(gint priority, guint milliseconds, gboolean force) {
-  if (iteration_request_id) {
-    if (iteration_request_forced && g_main_context_find_source_by_id(g_main_context_default(), iteration_request_id)) {
-      return FALSE;
+void
+iteration_request_full (gint priority, guint milliseconds)
+{
+  if (iter_req_id)
+    {
+      GSource *s;
+      gint s_prio;
+
+      s = g_main_context_find_source_by_id (g_main_context_default (),
+                                            iter_req_id);
+      if (G_UNLIKELY (s == NULL))
+        goto new_request;
+
+      s_prio = g_source_get_priority (s);
+
+      if (iter_req_delay == 0
+          || milliseconds >= iter_req_delay
+                             - (g_source_get_time (s) - iter_req_start) / 1000 )
+        {
+          if (priority < s_prio)
+            g_source_set_priority (s, priority);
+          return;
+        }
+
+      if (s_prio < priority)
+        priority = s_prio;
+
+      g_source_remove (iter_req_id);
     }
-    // remove scheduled iterations
-    g_source_remove(iteration_request_id);
-  }
-  iteration_request_id = g_timeout_add_full(priority, milliseconds, iterate, GUINT_TO_POINTER(0), NULL);
-  iteration_request_forced = force;
-  return TRUE;
+
+new_request:
+  iter_req_start = g_get_monotonic_time();
+  iter_req_id = g_timeout_add_full (priority, milliseconds, iterate,
+                                    GUINT_TO_POINTER(0), NULL);
+  iter_req_delay = milliseconds;
 }
 
 //! Schedule iteration with seconds granularity delay. See `iteration_request_full()`.
-gboolean iteration_request_seconds_full(gint priority, guint seconds) {
-  if (iteration_request_id) {
-    if (iteration_request_forced && g_main_context_find_source_by_id(g_main_context_default(), iteration_request_id)) {
-      return FALSE;
+void
+iteration_request_seconds_full (gint priority, guint seconds)
+{
+  if (iter_req_id)
+    {
+      GSource *s;
+      gint s_prio;
+
+      s = g_main_context_find_source_by_id (g_main_context_default (),
+                                            iter_req_id);
+      if (G_UNLIKELY (s == NULL))
+        goto new_request;
+
+      if (iter_req_uses_secs == FALSE)
+        {
+          iteration_request_full (priority, seconds * 1000);
+          return;
+        }
+
+      s_prio = g_source_get_priority (s);
+
+      if (iter_req_delay == 0
+          || seconds * 1000 >= iter_req_delay
+                               -(g_source_get_time (s) - iter_req_start) / 1000)
+        {
+          if (priority < s_prio)
+            g_source_set_priority (s, priority);
+          return;
+        }
+
+      if (s_prio < priority)
+        priority = s_prio;
+
+      g_source_remove (iter_req_id);
     }
-    g_source_remove(iteration_request_id);
-  }
-  iteration_request_id = g_timeout_add_seconds_full(priority, seconds, iterate, GUINT_TO_POINTER(0), NULL);
-  iteration_request_forced = FALSE;
-  return TRUE;
+
+new_request:
+  iter_req_start = g_get_monotonic_time();
+  iter_req_id = g_timeout_add_seconds_full (priority, seconds, iterate,
+                                            GUINT_TO_POINTER(0), NULL);
+  iter_req_delay = seconds * 1000;
+  iter_req_uses_secs = TRUE;
 }
 
 int iterate(gpointer ignored) {
@@ -2490,8 +2543,8 @@ int iterate(gpointer ignored) {
   gdouble last, current, tparse, tfilter, tscheduler, thooks;
   gulong dump;
 
-  g_source_remove(iteration_request_id);
-  iteration_request_forced = FALSE;
+  g_source_remove (iter_req_id);
+  iter_req_id = 0;
 
   tparse = g_timer_elapsed(timer_parse.timer, &dump);
   tfilter = g_timer_elapsed(timer_filter.timer, &dump);

@@ -447,8 +447,13 @@ static int signal_suspend (gpointer signal) {
   u_trace("added system flag: suspend");
   u_flag_add(NULL, flg, TRUE);
   DEC_REF(flg);
-  iteration_request_full(G_PRIORITY_HIGH, 0, TRUE); //scheduler should detect shutdown and quit the daemon
-  g_timeout_add(0, fallback_quit, GUINT_TO_POINTER(1)); //fallback quit if scheduler is buggy
+
+  iteration_request_full (G_PRIORITY_HIGH, 0);
+  /*
+   * scheduler should detect shutdown and quit the daemon; but we must ensure
+   * fallback quit if the scheduler should fail (i.e. is buggy)
+   */
+  g_timeout_add(0, fallback_quit, GUINT_TO_POINTER(1));
   return 0;
 }
 
@@ -462,8 +467,13 @@ static int signal_quit(gpointer signal) {
   u_trace("added system flag: quit");
   u_flag_add(NULL, flg, TRUE);
   DEC_REF(flg);
-  iteration_request_full(G_PRIORITY_HIGH, 0, TRUE); //scheduler should detect shutdown and quit the daemon
-  g_timeout_add(0, fallback_quit, GUINT_TO_POINTER(1)); //fallback quit if scheduler is buggy
+
+  iteration_request_full (G_PRIORITY_HIGH, 0);
+  /*
+   * scheduler should detect shutdown and quit the daemon; but we must ensure
+   * fallback quit if the scheduler should fail (i.e. is buggy)
+   */
+  g_timeout_add(0, fallback_quit, GUINT_TO_POINTER(1));
   return 0;
 }
 

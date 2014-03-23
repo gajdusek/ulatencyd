@@ -558,10 +558,10 @@ int scheduler_set(u_scheduler *scheduler);
 
 extern int iteration_interval;
 
-gboolean iteration_request_full(gint priority, guint milliseconds, gboolean force);
-gboolean iteration_request_seconds_full(gint priority, guint seconds);
-static inline gboolean iteration_request(guint milliseconds);
-static inline gboolean iteration_request_seconds(guint seconds);
+void iteration_request_full(gint priority, guint milliseconds);
+void iteration_request_seconds_full(gint priority, guint seconds);
+static inline void iteration_request(guint milliseconds);
+static inline void iteration_request_seconds(guint seconds);
 
 int iterate(void *);
 
@@ -635,10 +635,10 @@ extern gboolean netlink_proc_listening; //!< Linux netlink module listening to p
  * Same as calling `iteration_request_full()` with `G_PRIORITY_DEFAULT`+1 priority.
  * `G_PRIORITY_DEFAULT`+1 because we want other events dispatched first.
  */
-static inline gboolean
-iteration_request(guint milliseconds)
+static inline void
+iteration_request (guint milliseconds)
 {
-  return iteration_request_full (G_PRIORITY_DEFAULT+1, milliseconds, FALSE);
+  iteration_request_full (G_PRIORITY_DEFAULT+1, milliseconds);
 }
 
 
@@ -648,10 +648,10 @@ iteration_request(guint milliseconds)
  * Same as calling `iteration_request_seconds()` with `G_PRIORITY_DEFAULT`+1 priority.
  * `G_PRIORITY_DEFAULT`+1 because we want other events dispatched first.
  */
-static inline gboolean
-iteration_request_seconds(guint seconds)
+static inline void
+iteration_request_seconds (guint seconds)
 {
-  return iteration_request_seconds_full (G_PRIORITY_DEFAULT+1, seconds);
+  iteration_request_seconds_full (G_PRIORITY_DEFAULT+1, seconds);
 }
 
 
