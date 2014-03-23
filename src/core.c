@@ -2543,8 +2543,13 @@ int iterate(gpointer ignored) {
   gdouble last, current, tparse, tfilter, tscheduler, thooks;
   gulong dump;
 
-  g_source_remove (iter_req_id);
-  iter_req_id = 0;
+  if (iter_req_id
+      && g_main_context_find_source_by_id (g_main_context_default(),
+                                           iter_req_id))
+    {
+      g_source_remove (iter_req_id);
+      iter_req_id = 0;
+    }
 
   tparse = g_timer_elapsed(timer_parse.timer, &dump);
   tfilter = g_timer_elapsed(timer_filter.timer, &dump);
