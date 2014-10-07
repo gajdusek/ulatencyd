@@ -38,10 +38,10 @@ U_SESSION.data = {}
 --! @name read-only properties
 --! @{
 
---! If TRUE, the `#U_SESSION` instance is valid, i.e. not closed.
+--! If TRUE, the `#U_SESSION` instance is valid, session is opened.
 --! @public @memberof U_SESSION
 U_SESSION.is_valid = <boolean>
---! If TRUE, the `#U_SESSION` instance is invalid, closed and waiting until lua 
+--! If TRUE, the `#U_SESSION` instance is invalid, closed and waiting until lua
 --! references drop to zero so the `#USession` instance may be freed
 --!
 --! @attention If you have stored references to this session somewhere, remove them, so the `#USession` may be freed.

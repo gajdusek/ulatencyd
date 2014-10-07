@@ -5,7 +5,7 @@
 --! @ingroup lua_DOCS
 
 --! @addtogroup lua_CORE
---! @brief CORE functionality accessible to the lua @ref lua_RULES "rule files"
+--! @brief C core functionality exported via lua bindings.
 --! @details 
 --! Important functionality implemented in the ulatencyd core (C language) is exported via lua bindings and the core 
 --! functionality is further extended by the `src/lua/*.lua` files. This documentation module and submodules describe

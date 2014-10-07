@@ -14,35 +14,34 @@
 --! - Documentation of files are a bit useless as they may be incorrectly parsed by doxygen-lua.
 --! - No sense of `local` keyword.
 --! - Call/caller graphs of lua functions cannot be generated.
---! - For the documenting purpose several pseudo types (tables) are defined. These mostly describe anonymous tables
---!   (e.g. return values of functions), structures defined in C without suitable documentation, and classes/interface
---!   enabling inheritance description (flags, filters etc.).
+--! - We define some lua pseudo types (tables) solely for documentation purposes; to describe anonymous tables returned by functions,
+--!   structures exported from C core and third-party libraries, pseudo classes and interfaces used to describe objects inheritance (like flags and filters).
 --!
 --! ### Classes members visibility
---! Lua has no concept of classes (tables) members visibility (public, proctected, private), though the visibility is used in documentation
---! as providing additional grouping level:
---! - **public**: for use outside the class scope
+--! Lua has no concept of classes (tables) members visibility (public, proctected, private), though the visibility used in documentation
+--! provides only additional grouping level:
+--! - **public**: for members which are suitable to use outside the class scope
 --! - **protected**: generally not useful outside the scope of class
---! - **private**: internals, usefull only withing the scope of class, commonly being prefixed with underscore '_'
+--! - **private**: internals, useful only within the scope of class, commonly being prefixed with underscore '_'
 --!   or defined as local.
 --!
 --! ## Ulatencyd overview
 --! ulatencyd can be viewed as having 3 functional modules:
 --!
 --! - @link lua_CORE core@endlink, which does process parsing, building a process tree, etc.
---! - @link lua_RULES rules@endlink, which categorize the processes, analyze the system etc. 
---! - the @link lua_SCHEDULER scheduler@endlink, which uses the information collected by the core and rules to make 
+--! - @link lua_RULES rules@endlink, which categorize the processes, analyze the system etc.
+--! - the @link lua_SCHEDULER scheduler@endlink, which uses the information collected by the core and rules to make
 --!   decisions on the processes.
 --!
 --! ### core
 --! The core listens on the kernel when new processes are spawned or exit and runs the @link lua_FILTERS filters@endlink
 --! and @link lua_SCHEDULER scheduler@endlink on them.
---! Additionally, a full @ref ulatency.run_iteration "iteration" is run every configurable number of seconds (default 12) on all processes. This is 
+--! Additionally, a scheduler full @ref ulatency.run_iteration "iteration" is run every configurable number of seconds (default 12) on all processes. This is
 --! required for example when @link lua_FLAGS flags@endlink, set on a process, expire and the scheduler will make another decision.
 --!
---! Both, the scheduler and most of filters, are implemented in the lua rules files. They can use the C core 
---! functionality exported via lua bindings. For example most variables and functions implemented in the C code are 
---! exported in `#ulatency` global lua table. 
+--! Both, the scheduler and most of filters, are implemented in the lua rules files. They can use the C core
+--! functionality exported via lua bindings. For example most variables and functions implemented in the C code are
+--! exported in `#ulatency` global lua table.
 --!
 --! The core functionality is further extended by the `src/lua/*.lua` files which extend `#ulatency` and `#U_PROC`
 --! classes, define `#CGroup` class and other miscellaneous functions that rules (filters, timeout functions and
@@ -54,12 +53,12 @@
 --! - and more
 --!
 --! ### rules
---! Generally, the rules are **all lua files** in the `ulatency.path_rules_directory`. 
+--! Generally, the rules are **all lua files** in the `ulatency.path_rules_directory`.
 --! The rules files implement @link lua_FILTERS filters@endlink, @link lua_TIMEOUTS timeout functions@endlink
 --! and the @link lua_SCHEDULER scheduler@endlink; and register them to the core.
 --!
---! The rules are loaded 
---! according the configuration in `/etc/ulatencyd/ulatencyd.conf`, where you can exclude some rules 
+--! The rules are loaded
+--! according the configuration in `/etc/ulatencyd/ulatencyd.conf`, where you can exclude some rules
 --! from being loaded. Further, when you are starting ulatencyd from command line, you can specify entirely different rules directory and
 --! the pattern files must match to be loaded.
 --!
@@ -77,9 +76,9 @@
 --! that is assigned to global `scheduler` variable (exported to lua via `ulatency.scheduler`). So strictly speaking, scheduler should be
 --! considered as part of the @link lua_RULES rules@endlink.
 --!
---! Some settings are adjustable in /etc/ulatencyd/ulatencyd.conf and the cgroups that will be used can be changed in 
+--! Some settings are adjustable in /etc/ulatencyd/ulatencyd.conf and the cgroups that will be used can be changed in
 --! /etc/ulatencyd/cgroups.conf
---! 
+--!
 --! The rules and the scheduler can be adjusted by the user to his wishes.
 --!
 --! @image html architecture.png "ulatency architecture"

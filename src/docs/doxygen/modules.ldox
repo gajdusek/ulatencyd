@@ -49,6 +49,7 @@
 --!     @ingroup  lua_CORE
 
 --!   @defgroup lua_RULES Rules
+--!   @brief Rules categorize processes, analyze the system etc.
 --!   @ingroup lua_API
 
 --!     @defgroup lua_FILTERS Filters
@@ -100,7 +101,7 @@
 --!     @ingroup USession
 
 --!   @defgroup UFocus
---!   @brief Track applications that have user focus
+--!   @brief Implements tree containing applications focus history
 --!   @ingroup core
 
 --!   @defgroup UHook Hooks
@@ -109,6 +110,8 @@
 --!   @defgroup UAssert Debug assertions
 --!   @ingroup core
 
+--!   @defgroup UTask Tasks
+--!   @ingroup core
 
 ----- hidden groups ------
 

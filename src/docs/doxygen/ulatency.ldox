@@ -580,7 +580,7 @@ end
 --!
 --! If you want to reschedule all processes, beside those changed, set `system_flags_changed`
 --! (@link ulatency.set_flags_changed `ulatency.set_flags_changed(1)`@endlink) before you invoke `ulatency.run_iteration()`.
---! Note that this won't work inside scheduler or the mappings as the flag at the end of every iteration.
+--! Note that this won't work inside scheduler or the mappings as the flag is cleared at the end of every iteration.
 --!
 --! ##Iteration consists of following steps:
 --! - clears timed out system flags
