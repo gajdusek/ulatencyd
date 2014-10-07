@@ -48,7 +48,28 @@
 #define u_assert_process_dead(proc) u_assert_process_dead_real (proc,     \
                                                                 G_STRLOC)
 
+//! \name GLib like macros
+//! Checks are performed only if DEVELOP_MODE is defined and G_DISABLE_CHECKS
+//! is not.
+//! @{
+
+#ifndef DEVEL_MODE
+
+#define u_return_if_fail(expr) do { (void)0; } while (0);
+#define u_return_val_if_fail(expr,val) do { (void)0; } while (0);
+
+#else /* DEVEL_MODE */
+
+#define u_return_if_fail(expr) g_return_if_fail(expr);
+#define u_return_val_if_fail(expr,val) g_return_val_if_fail(expr, val);
+
+#endif
+
+//! @} End of "GLib like macros"
+
 /*! @} End of "addtogroup UAssert" */
+
+/* --- implementation --- */
 
 void  u_assert_process_dead_real (u_proc      *proc,
                                   const gchar *strloc);
